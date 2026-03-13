@@ -1,0 +1,9 @@
+services:
+  event-manager:
+    build: .
+    container_name: event-manager
+    ports:
+      - "30001:7000"
+    env_file:
+      - .env
+    restart: unless-stopped
