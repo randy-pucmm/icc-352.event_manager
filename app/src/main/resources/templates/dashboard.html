@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}">
+    <title>Dashboard</title>
+</head>
+<body>
+    <div th:replace="~{fragments/layout :: sidebar}">
+    </div>
+
+    <!-- Inject main content via script -->
+    <template id="dashboardContent">
+        <div class="container-fluid p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+                    </h2>
+                    <p class="text-muted mb-0">Bienvenido, <span th:text="${usuario.nombre}">Usuario</span></p>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-4">
+                <!-- Eventos Disponibles - visible para todos -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary-subtle text-primary">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" th:text="${totalEventos}">0</span>
+                            <span class="stat-label">Eventos Disponibles</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mis Inscripciones - solo participante -->
+                <div class="col-sm-6 col-xl-3" th:if="${usuario.rol.name() == 'PARTICIPANTE'}">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success-subtle text-success">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" th:text="${misInscripciones != null} ? ${misInscripciones} : 0">0</span>
+                            <span class="stat-label">Mis Inscripciones</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mis Eventos - organizador/admin -->
+                <div class="col-sm-6 col-xl-3" th:if="${usuario.rol.name() == 'ORGANIZADOR' or usuario.rol.name() == 'ADMINISTRADOR'}">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning-subtle text-warning">
+                            <i class="fas fa-list-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" th:text="${misEventos != null} ? ${misEventos} : 0">0</span>
+                            <span class="stat-label">Mis Eventos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Usuarios - solo admin -->
+                <div class="col-sm-6 col-xl-3" th:if="${usuario.rol.name() == 'ADMINISTRADOR'}">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-danger-subtle text-danger">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" th:text="${totalUsuarios != null} ? ${totalUsuarios} : 0">0</span>
+                            <span class="stat-label">Total Usuarios</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Eventos Sistema - solo admin -->
+                <div class="col-sm-6 col-xl-3" th:if="${usuario.rol.name() == 'ADMINISTRADOR'}">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-info-subtle text-info">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" th:text="${totalEventosSistema != null} ? ${totalEventosSistema} : 0">0</span>
+                            <span class="stat-label">Total Eventos (Sistema)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title fw-semibold mb-3">
+                                <i class="fas fa-bolt me-2 text-warning"></i>Acciones Rápidas
+                            </h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="/eventos" class="btn btn-outline-primary">
+                                    <i class="fas fa-calendar-alt me-1"></i>Ver Eventos
+                                </a>
+                                <a href="/eventos/crear" class="btn btn-outline-success"
+                                   th:if="${usuario.rol.name() == 'ORGANIZADOR' or usuario.rol.name() == 'ADMINISTRADOR'}">
+                                    <i class="fas fa-plus-circle me-1"></i>Crear Evento
+                                </a>
+                                <a href="/escanear-qr" class="btn btn-outline-info"
+                                   th:if="${usuario.rol.name() == 'ORGANIZADOR' or usuario.rol.name() == 'ADMINISTRADOR'}">
+                                    <i class="fas fa-qrcode me-1"></i>Escanear QR
+                                </a>
+                                <a href="/admin/usuarios" class="btn btn-outline-danger"
+                                   th:if="${usuario.rol.name() == 'ADMINISTRADOR'}">
+                                    <i class="fas fa-users-cog me-1"></i>Gestionar Usuarios
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const content = document.getElementById('dashboardContent');
+            const mainArea = document.querySelector('.main-content');
+            if (content && mainArea) {
+                mainArea.innerHTML = content.innerHTML;
+            }
+        });
+    </script>
+</body>
+</html>

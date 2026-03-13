@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' | Event Manager'">Event Manager</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+
+<!-- Sidebar Fragment -->
+<div th:fragment="sidebar" class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <i class="fas fa-calendar-check me-2"></i>
+                <span>Event Manager</span>
+            </div>
+        </div>
+
+        <!-- User info -->
+        <div class="sidebar-user">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-info">
+                <span class="user-name" th:text="${usuario.nombre}">Usuario</span>
+                <span class="user-role badge" th:classappend="${usuario.rol.name() == 'ADMINISTRADOR'} ? 'bg-danger' : (${usuario.rol.name() == 'ORGANIZADOR'} ? 'bg-primary' : 'bg-success')"
+                      th:text="${usuario.rol.name()}">ROL</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul class="sidebar-nav">
+            <li class="nav-section">Principal</li>
+            <li>
+                <a href="/dashboard" th:classappend="${currentPage == 'dashboard'} ? 'active' : ''">
+                    <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/eventos" th:classappend="${currentPage == 'eventos'} ? 'active' : ''">
+                    <i class="fas fa-calendar-alt"></i><span>Eventos</span>
+                </a>
+            </li>
+
+            <!-- Participante -->
+            <li th:if="${usuario.rol.name() == 'PARTICIPANTE'}">
+                <a href="/mis-inscripciones" th:classappend="${currentPage == 'inscripciones'} ? 'active' : ''">
+                    <i class="fas fa-ticket-alt"></i><span>Mis Inscripciones</span>
+                </a>
+            </li>
+
+            <!-- Organizador / Admin -->
+            <li th:if="${usuario.rol.name() == 'ORGANIZADOR' or usuario.rol.name() == 'ADMINISTRADOR'}">
+                <li class="nav-section">Organización</li>
+                <li>
+                    <a href="/mis-eventos" th:classappend="${currentPage == 'mis-eventos'} ? 'active' : ''">
+                        <i class="fas fa-list-alt"></i><span>Mis Eventos</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/eventos/crear" th:classappend="${currentPage == 'crear-evento'} ? 'active' : ''">
+                        <i class="fas fa-plus-circle"></i><span>Crear Evento</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/escanear-qr" th:classappend="${currentPage == 'escanear-qr'} ? 'active' : ''">
+                        <i class="fas fa-qrcode"></i><span>Escanear QR</span>
+                    </a>
+                </li>
+            </li>
+
+            <!-- Admin -->
+            <li th:if="${usuario.rol.name() == 'ADMINISTRADOR'}">
+                <li class="nav-section">Administración</li>
+                <li>
+                    <a href="/admin/usuarios" th:classappend="${currentPage == 'admin-usuarios'} ? 'active' : ''">
+                        <i class="fas fa-users-cog"></i><span>Gestión Usuarios</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/eventos" th:classappend="${currentPage == 'admin-eventos'} ? 'active' : ''">
+                        <i class="fas fa-calendar-times"></i><span>Gestión Eventos</span>
+                    </a>
+                </li>
+            </li>
+
+            <li class="nav-section">Cuenta</li>
+            <li>
+                <a href="/logout" class="nav-logout">
+                    <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Page content wrapper -->
+    <div class="page-content" id="page-content">
+        <!-- Top navbar for mobile -->
+        <nav class="topbar d-lg-none">
+            <button class="btn btn-link sidebar-toggle" id="sidebarToggle" type="button">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="topbar-brand">Event Manager</span>
+            <div></div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="main-content">
+            <!-- Content gets replaced by each page -->
+        </main>
+    </div>
+</div>
+
+<!-- Overlay for mobile sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JS -->
+<script src="/js/main.js"></script>
+
+</body>
+</html>
