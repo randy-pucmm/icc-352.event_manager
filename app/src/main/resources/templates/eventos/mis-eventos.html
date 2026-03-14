@@ -60,6 +60,9 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm" th:unless="${evento.cancelado}">
+                                        <a th:href="'/eventos/' + ${evento.id} + '/asistencia'" class="btn btn-outline-info" title="Asistencia">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </a>
                                         <a th:href="'/eventos/' + ${evento.id} + '/editar'" class="btn btn-outline-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>

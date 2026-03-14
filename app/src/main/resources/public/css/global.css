@@ -584,3 +584,45 @@ body {
 .qr-code img {
     border-radius: 8px;
 }
+
+/* ============================================
+   QR Scanner Page
+   ============================================ */
+
+.qr-scanner-container {
+    display: none;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+}
+
+.qr-scanner-container video {
+    border-radius: 12px;
+}
+
+.scanner-placeholder {
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+}
+
+.scan-history-item:last-child {
+    border-bottom: none !important;
+}
+
+#qr-reader__scan_region {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#qr-reader__dashboard {
+    display: none !important;
+}
+
+/* ============================================
+   Attendance Table
+   ============================================ */
+
+.table-success {
+    --bs-table-bg: rgba(16, 185, 129, 0.08);
+}

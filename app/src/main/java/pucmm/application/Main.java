@@ -62,6 +62,11 @@ public class Main {
                 get("/admin/usuarios", AdminController::listarUsuarios);
                 post("/admin/usuarios/{id}/bloquear", AdminController::toggleBloquear);
                 post("/admin/usuarios/{id}/rol", AdminController::cambiarRol);
+                get("/admin/usuarios/crear", AdminController::crearUsuarioPage);
+                post("/admin/usuarios/crear", AdminController::crearUsuario);
+                get("/admin/usuarios/{id}/editar", AdminController::editarUsuarioPage);
+                post("/admin/usuarios/{id}/editar", AdminController::editarUsuario);
+                post("/admin/usuarios/{id}/eliminar", AdminController::eliminarUsuario);
                 get("/admin/eventos", AdminController::listarEventos);
                 post("/admin/eventos/{id}/eliminar", AdminController::eliminarEvento);
 
@@ -72,6 +77,8 @@ public class Main {
                 before("/eventos/crear/*", AuthFilter::requireOrganizador);
                 before("/escanear-qr", AuthFilter::requireOrganizador);
                 before("/escanear-qr/*", AuthFilter::requireOrganizador);
+                get("/escanear-qr", InscripcionController::escanearQrPage);
+                post("/escanear-qr/verificar", InscripcionController::verificarQr);
                 get("/mis-eventos", EventoController::misEventos);
                 get("/eventos/crear", EventoController::crearPage);
                 post("/eventos/crear", EventoController::crear);
@@ -86,6 +93,7 @@ public class Main {
                 post("/eventos/{id}/publicar", EventoController::togglePublicar);
                 post("/eventos/{id}/cancelar", EventoController::cancelar);
                 post("/eventos/{id}/inscribir", InscripcionController::inscribirse);
+                get("/eventos/{id}/asistencia", InscripcionController::listaAsistencia);
 
                 // Inscription routes
                 before("/mis-inscripciones", AuthFilter::requireAuth);

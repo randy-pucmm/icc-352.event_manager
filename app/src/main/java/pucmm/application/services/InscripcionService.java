@@ -69,6 +69,27 @@ public class InscripcionService extends GenericService<Inscripcion> {
         }
     }
 
+    public Inscripcion findByTokenWithDetails(String tokenQr) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT i FROM Inscripcion i LEFT JOIN FETCH i.usuario LEFT JOIN FETCH i.evento WHERE i.tokenQr = :token",
+                    Inscripcion.class)
+                    .setParameter("token", tokenQr)
+                    .uniqueResult();
+        }
+    }
+
+    public List<Inscripcion> findByEventoWithUsuario(Long eventoId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT i FROM Inscripcion i LEFT JOIN FETCH i.usuario WHERE i.evento.id = :eid AND i.estado = :estado ORDER BY i.fechaInscripcion ASC",
+                    Inscripcion.class)
+                    .setParameter("eid", eventoId)
+                    .setParameter("estado", EstadoInscripcion.ACTIVA)
+                    .list();
+        }
+    }
+
     public Inscripcion findCanceladaByUsuarioAndEvento(Long usuarioId, Long eventoId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(

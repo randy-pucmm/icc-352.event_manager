@@ -55,4 +55,51 @@ public class UsuarioService extends GenericService<Usuario> {
         Usuario usuario = new Usuario(nombre, username, PasswordUtil.hashPassword(password), rol);
         return save(usuario);
     }
+
+    public Usuario registrarPorAdmin(String nombre, String username, String password, RolUsuario rol, Usuario admin) {
+        if (existeUsername(username)) {
+            throw new IllegalArgumentException("El nombre de usuario ya existe.");
+        }
+        Usuario usuario = new Usuario(nombre, username, PasswordUtil.hashPassword(password), rol);
+        usuario.setCreadoPor(admin);
+        return save(usuario);
+    }
+
+    public Usuario editarUsuario(Long userId, String nombre, String username, String password, RolUsuario rol) {
+        Usuario usuario = find(userId);
+        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
+        if (!usuario.isEliminable()) throw new IllegalStateException("No se puede editar al administrador principal.");
+
+        // Check username uniqueness if changed
+        if (!usuario.getUsername().equals(username)) {
+            Usuario existing = findByUsername(username);
+            if (existing != null) {
+                throw new IllegalArgumentException("El nombre de usuario ya existe.");
+            }
+        }
+
+        usuario.setNombre(nombre);
+        usuario.setUsername(username);
+        usuario.setRol(rol);
+        if (password != null && !password.isBlank()) {
+            usuario.setPasswordHash(PasswordUtil.hashPassword(password));
+        }
+        return update(usuario);
+    }
+
+    public void eliminarUsuario(Long userId) {
+        Usuario usuario = find(userId);
+        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
+        if (!usuario.isEliminable()) throw new IllegalStateException("No se puede eliminar al administrador principal.");
+        delete(userId);
+    }
+
+    public java.util.List<Usuario> findAllWithCreadoPor() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT DISTINCT u FROM Usuario u LEFT JOIN FETCH u.creadoPor ORDER BY u.fechaCreacion DESC",
+                    Usuario.class)
+                    .list();
+        }
+    }
 }

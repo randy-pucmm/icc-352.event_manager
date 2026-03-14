@@ -37,6 +37,10 @@ public class Usuario {
     @Column(nullable = false)
     private LocalDateTime fechaCreacion;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creado_por_id")
+    private Usuario creadoPor;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Inscripcion> inscripciones = new ArrayList<>();
 
@@ -141,5 +145,13 @@ public class Usuario {
 
     public void setEventosOrganizados(List<Evento> eventosOrganizados) {
         this.eventosOrganizados = eventosOrganizados;
+    }
+
+    public Usuario getCreadoPor() {
+        return creadoPor;
+    }
+
+    public void setCreadoPor(Usuario creadoPor) {
+        this.creadoPor = creadoPor;
     }
 }

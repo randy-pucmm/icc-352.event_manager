@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}">
+    <title>Crear Usuario</title>
+</head>
+<body>
+    <div th:replace="~{fragments/layout :: sidebar}">
+    </div>
+
+    <template id="pageContent">
+        <div class="container-fluid p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-user-plus me-2 text-danger"></i>Crear Usuario
+                    </h2>
+                    <p class="text-muted mb-0">Crea un nuevo usuario y asigna su rol directamente</p>
+                </div>
+                <a href="/admin/usuarios" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Volver a Usuarios
+                </a>
+            </div>
+
+            <!-- Alerts -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle me-1"></i>
+                <span th:text="${error}">Error</span>
+            </div>
+            <div th:if="${success}" class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-1"></i>
+                <span th:text="${success}">Success</span>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <form method="post" action="/admin/usuarios/crear" id="formCrearUsuario" novalidate>
+                                <!-- Nombre -->
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label fw-semibold">Nombre completo</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre"
+                                           placeholder="Ej: Juan Pérez" required minlength="2">
+                                    <div class="invalid-feedback">El nombre es requerido (mínimo 2 caracteres)</div>
+                                </div>
+
+                                <!-- Username -->
+                                <div class="mb-3">
+                                    <label for="username" class="form-label fw-semibold">Nombre de usuario</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-at"></i></span>
+                                        <input type="text" class="form-control" id="username" name="username"
+                                               placeholder="Ej: jperez" required minlength="3">
+                                    </div>
+                                    <div class="invalid-feedback">El username es requerido (mínimo 3 caracteres)</div>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="mb-3">
+                                    <label for="password" class="form-label fw-semibold">Contraseña</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="password" name="password"
+                                               placeholder="Mínimo 4 caracteres" required minlength="4">
+                                        <button type="button" class="btn btn-outline-secondary toggle-password" id="togglePass">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback">La contraseña debe tener al menos 4 caracteres</div>
+                                </div>
+
+                                <!-- Rol -->
+                                <div class="mb-4">
+                                    <label for="rol" class="form-label fw-semibold">Rol asignado</label>
+                                    <select class="form-select" id="rol" name="rol" required>
+                                        <option value="" disabled selected>Selecciona un rol...</option>
+                                        <option th:each="r : ${roles}" th:value="${r.name()}" th:text="${r.name()}">Rol</option>
+                                    </select>
+                                    <div class="invalid-feedback">Selecciona un rol</div>
+                                    <div class="form-text mt-1">
+                                        <small>
+                                            <strong>ADMINISTRADOR:</strong> Gestión total del sistema |
+                                            <strong>ORGANIZADOR:</strong> Crear y gestionar eventos |
+                                            <strong>PARTICIPANTE:</strong> Inscribirse a eventos
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-user-plus me-1"></i>Crear Usuario
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info card -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm bg-light">
+                        <div class="card-body p-4">
+                            <h6 class="fw-semibold mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Información</h6>
+                            <ul class="list-unstyled mb-0 small text-muted">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>El usuario será creado inmediatamente con el rol seleccionado.</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Se guardará una referencia de que tú creaste este usuario.</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>El nombre de usuario debe ser único en el sistema.</li>
+                                <li><i class="fas fa-check text-success me-2"></i>El usuario podrá cambiar su contraseña después de iniciar sesión.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const content = document.getElementById('pageContent');
+            const mainArea = document.querySelector('.main-content');
+            if (content && mainArea) {
+                mainArea.innerHTML = content.innerHTML;
+            }
+
+            // Toggle password visibility
+            const toggleBtn = document.getElementById('togglePass');
+            const passInput = document.getElementById('password');
+            if (toggleBtn && passInput) {
+                toggleBtn.addEventListener('click', function() {
+                    const type = passInput.type === 'password' ? 'text' : 'password';
+                    passInput.type = type;
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            }
+
+            // Client-side validation
+            const form = document.getElementById('formCrearUsuario');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    let valid = true;
+                    const nombre = document.getElementById('nombre');
+                    const username = document.getElementById('username');
+                    const password = document.getElementById('password');
+                    const rol = document.getElementById('rol');
+
+                    [nombre, username, password, rol].forEach(function(el) {
+                        el.classList.remove('is-invalid');
+                    });
+
+                    if (!nombre.value.trim() || nombre.value.trim().length < 2) {
+                        nombre.classList.add('is-invalid');
+                        valid = false;
+                    }
+                    if (!username.value.trim() || username.value.trim().length < 3) {
+                        username.classList.add('is-invalid');
+                        valid = false;
+                    }
+                    if (!password.value || password.value.length < 4) {
+                        password.classList.add('is-invalid');
+                        valid = false;
+                    }
+                    if (!rol.value) {
+                        rol.classList.add('is-invalid');
+                        valid = false;
+                    }
+
+                    if (!valid) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
