@@ -82,6 +82,7 @@ gradle-app.setting
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:
 *.tex
+# Allow LaTeX source in report directory
 *.aux
 *.lof
 *.log

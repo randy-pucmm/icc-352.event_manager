@@ -4,6 +4,19 @@ services:
       context: .
       dockerfile: Dockerfile
     image: tzeik/javalin-event-manager:latest
+    container_name: event-manager
     ports:
-      - "30001:7000"
+      - "30015:7000"
+    volumes:
+      - h2_data:/app/data
+    environment:
+      - DB_URL=jdbc:h2:file:/app/data/eventos;AUTO_SERVER=TRUE
+      - DB_USER=sa
+      - DB_PASSWORD=
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin123
     restart: unless-stopped
+
+volumes:
+  h2_data:
+    driver: local
