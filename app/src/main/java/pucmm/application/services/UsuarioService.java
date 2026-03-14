@@ -15,7 +15,7 @@ public class UsuarioService extends GenericService<Usuario> {
     public Usuario findByUsername(String username) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
-                            "FROM Usuario u WHERE u.username = :username", Usuario.class)
+                    "FROM Usuario u WHERE u.username = :username", Usuario.class)
                     .setParameter("username", username)
                     .uniqueResult();
         }
@@ -23,23 +23,31 @@ public class UsuarioService extends GenericService<Usuario> {
 
     public Usuario authenticate(String username, String password) {
         Usuario usuario = findByUsername(username);
-        if (usuario == null) return null;
-        if (!usuario.isActivo()) return null;
-        if (!PasswordUtil.checkPassword(password, usuario.getPasswordHash())) return null;
+        if (usuario == null)
+            return null;
+        if (!usuario.isActivo())
+            return null;
+        if (!PasswordUtil.checkPassword(password, usuario.getPasswordHash()))
+            return null;
         return usuario;
     }
 
     public Usuario cambiarRol(Long userId, RolUsuario nuevoRol) {
         Usuario usuario = find(userId);
-        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
+        if (usuario == null)
+            throw new IllegalArgumentException("Usuario no encontrado.");
+        if (!usuario.isEliminable())
+            throw new IllegalStateException("No se puede cambiar el rol del administrador principal.");
         usuario.setRol(nuevoRol);
         return update(usuario);
     }
 
     public Usuario bloquearUsuario(Long userId) {
         Usuario usuario = find(userId);
-        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
-        if (!usuario.isEliminable()) throw new IllegalStateException("No se puede bloquear al administrador principal.");
+        if (usuario == null)
+            throw new IllegalArgumentException("Usuario no encontrado.");
+        if (!usuario.isEliminable())
+            throw new IllegalStateException("No se puede bloquear al administrador principal.");
         usuario.setActivo(!usuario.isActivo());
         return update(usuario);
     }
@@ -67,8 +75,8 @@ public class UsuarioService extends GenericService<Usuario> {
 
     public Usuario editarUsuario(Long userId, String nombre, String username, String password, RolUsuario rol) {
         Usuario usuario = find(userId);
-        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
-        if (!usuario.isEliminable()) throw new IllegalStateException("No se puede editar al administrador principal.");
+        if (usuario == null)
+            throw new IllegalArgumentException("Usuario no encontrado.");
 
         // Check username uniqueness if changed
         if (!usuario.getUsername().equals(username)) {
@@ -80,7 +88,10 @@ public class UsuarioService extends GenericService<Usuario> {
 
         usuario.setNombre(nombre);
         usuario.setUsername(username);
-        usuario.setRol(rol);
+        // Protected admin cannot change role
+        if (usuario.isEliminable()) {
+            usuario.setRol(rol);
+        }
         if (password != null && !password.isBlank()) {
             usuario.setPasswordHash(PasswordUtil.hashPassword(password));
         }
@@ -89,8 +100,10 @@ public class UsuarioService extends GenericService<Usuario> {
 
     public void eliminarUsuario(Long userId) {
         Usuario usuario = find(userId);
-        if (usuario == null) throw new IllegalArgumentException("Usuario no encontrado.");
-        if (!usuario.isEliminable()) throw new IllegalStateException("No se puede eliminar al administrador principal.");
+        if (usuario == null)
+            throw new IllegalArgumentException("Usuario no encontrado.");
+        if (!usuario.isEliminable())
+            throw new IllegalStateException("No se puede eliminar al administrador principal.");
         delete(userId);
     }
 

@@ -97,7 +97,7 @@ public class EventoController {
             eventoService.save(evento);
             ctx.redirect("/mis-eventos");
         } catch (DateTimeParseException | NumberFormatException e) {
-            ctx.redirect("/eventos/crear?error=Datos+inválidos");
+            ctx.redirect("/eventos/crear?error=Datos+invalidos");
         }
     }
 
@@ -184,7 +184,7 @@ public class EventoController {
             eventoService.update(evento);
             ctx.redirect("/mis-eventos");
         } catch (DateTimeParseException | NumberFormatException e) {
-            ctx.redirect("/eventos/" + id + "/editar?error=Datos+inválidos");
+            ctx.redirect("/eventos/" + id + "/editar?error=Datos+invalidos");
         }
     }
 

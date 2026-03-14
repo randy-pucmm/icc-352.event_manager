@@ -65,12 +65,18 @@
                                 </div>
 
                                 <!-- Rol -->
-                                <div class="mb-4">
+                                <div class="mb-4" th:if="${target.eliminable}">
                                     <label for="rol" class="form-label fw-semibold">Rol asignado</label>
                                     <select class="form-select" id="rol" name="rol" required>
                                         <option th:each="r : ${roles}" th:value="${r.name()}" th:text="${r.name()}"
                                                 th:selected="${r.name() == target.rol.name()}">Rol</option>
                                     </select>
+                                </div>
+                                <div class="mb-4" th:unless="${target.eliminable}">
+                                    <label class="form-label fw-semibold">Rol asignado</label>
+                                    <input type="hidden" name="rol" th:value="${target.rol.name()}">
+                                    <div class="form-control bg-light" th:text="${target.rol.name()}">ADMINISTRADOR</div>
+                                    <div class="form-text text-muted">El rol del administrador principal no se puede cambiar.</div>
                                 </div>
 
                                 <div class="d-flex gap-2">

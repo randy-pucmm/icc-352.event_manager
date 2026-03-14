@@ -80,7 +80,12 @@
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
-                                    <span class="badge bg-secondary" th:unless="${u.eliminable}">Protegido</span>
+                                    <div class="d-flex gap-1 justify-content-end" th:unless="${u.eliminable}">
+                                        <a th:href="'/admin/usuarios/' + ${u.id} + '/editar'" class="btn btn-sm btn-outline-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <span class="badge bg-secondary align-self-center">Protegido</span>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>

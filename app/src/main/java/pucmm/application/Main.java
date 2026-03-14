@@ -94,6 +94,7 @@ public class Main {
                 post("/eventos/{id}/cancelar", EventoController::cancelar);
                 post("/eventos/{id}/inscribir", InscripcionController::inscribirse);
                 get("/eventos/{id}/asistencia", InscripcionController::listaAsistencia);
+                get("/eventos/{id}/estadisticas", DashboardController::estadisticasEvento);
 
                 // Inscription routes
                 before("/mis-inscripciones", AuthFilter::requireAuth);

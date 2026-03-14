@@ -90,6 +90,6 @@ public class AuthController {
 
     public static void logout(Context ctx) {
         ctx.req().getSession().invalidate();
-        ctx.redirect("/login?success=Sesión+cerrada+correctamente");
+        ctx.redirect("/login?success=Sesion+cerrada+correctamente");
     }
 }

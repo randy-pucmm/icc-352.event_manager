@@ -60,7 +60,7 @@
             </li>
 
             <!-- Organizador / Admin -->
-            <li th:if="${usuario.rol.name() == 'ORGANIZADOR' or usuario.rol.name() == 'ADMINISTRADOR'}">
+            <th:block th:if="${usuario.rol.name() == 'ORGANIZADOR' or usuario.rol.name() == 'ADMINISTRADOR'}">
                 <li class="nav-section">Organización</li>
                 <li>
                     <a href="/mis-eventos" th:classappend="${currentPage == 'mis-eventos'} ? 'active' : ''">
@@ -77,10 +77,10 @@
                         <i class="fas fa-qrcode"></i><span>Escanear QR</span>
                     </a>
                 </li>
-            </li>
+            </th:block>
 
             <!-- Admin -->
-            <li th:if="${usuario.rol.name() == 'ADMINISTRADOR'}">
+            <th:block th:if="${usuario.rol.name() == 'ADMINISTRADOR'}">
                 <li class="nav-section">Administración</li>
                 <li>
                     <a href="/admin/usuarios" th:classappend="${currentPage == 'admin-usuarios'} ? 'active' : ''">
@@ -92,7 +92,7 @@
                         <i class="fas fa-calendar-times"></i><span>Gestión Eventos</span>
                     </a>
                 </li>
-            </li>
+            </th:block>
 
             <li class="nav-section">Cuenta</li>
             <li>
