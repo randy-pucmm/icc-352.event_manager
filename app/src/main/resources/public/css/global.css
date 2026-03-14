@@ -459,3 +459,128 @@ body {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 4px;
 }
+
+/* ============================================
+   Event Cards
+   ============================================ */
+
+.event-card {
+    border-radius: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.event-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.event-meta i {
+    width: 16px;
+    text-align: center;
+}
+
+/* ============================================
+   Cupo Circle (detail page)
+   ============================================ */
+
+.cupo-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e8f0fe, #f0f4ff);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--primary);
+}
+
+.cupo-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.cupo-label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+
+.table th {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    border-bottom-width: 1px;
+}
+
+.table td {
+    vertical-align: middle;
+    font-size: 0.875rem;
+}
+
+/* ============================================
+   Badge Styles
+   ============================================ */
+
+.badge {
+    font-weight: 500;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+/* ============================================
+   View Toggle Buttons
+   ============================================ */
+
+.btn-group .btn.active {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+/* ============================================
+   Inscription Cards
+   ============================================ */
+
+.inscripcion-card {
+    border-radius: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.inscripcion-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+}
+
+.inscripcion-cancelada {
+    opacity: 0.6;
+}
+
+/* ============================================
+   QR Code Container
+   ============================================ */
+
+.qr-container {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px dashed #dee2e6;
+}
+
+.qr-code {
+    display: inline-block;
+}
+
+.qr-code img {
+    border-radius: 8px;
+}

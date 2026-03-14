@@ -7,6 +7,7 @@ import pucmm.application.models.Usuario;
 import pucmm.application.models.enums.EstadoInscripcion;
 import pucmm.application.utils.HibernateUtil;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class InscripcionService extends GenericService<Inscripcion> {
@@ -48,6 +49,16 @@ public class InscripcionService extends GenericService<Inscripcion> {
         }
     }
 
+    public List<Inscripcion> findByUsuarioWithEvento(Long usuarioId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT i FROM Inscripcion i LEFT JOIN FETCH i.evento WHERE i.usuario.id = :uid ORDER BY i.fechaInscripcion DESC",
+                    Inscripcion.class)
+                    .setParameter("uid", usuarioId)
+                    .list();
+        }
+    }
+
     public Inscripcion findByToken(String tokenQr) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
@@ -58,13 +69,25 @@ public class InscripcionService extends GenericService<Inscripcion> {
         }
     }
 
+    public Inscripcion findCanceladaByUsuarioAndEvento(Long usuarioId, Long eventoId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "FROM Inscripcion i WHERE i.usuario.id = :uid AND i.evento.id = :eid AND i.estado = :estado",
+                    Inscripcion.class)
+                    .setParameter("uid", usuarioId)
+                    .setParameter("eid", eventoId)
+                    .setParameter("estado", EstadoInscripcion.CANCELADA)
+                    .uniqueResult();
+        }
+    }
+
     public Inscripcion inscribir(Usuario usuario, Evento evento) {
         // Validate event is available
         if (!evento.isDisponible() || evento.isCancelado()) {
             throw new IllegalStateException("El evento no está disponible para inscripción.");
         }
 
-        // Validate no duplicate
+        // Validate no active duplicate
         Inscripcion existente = findByUsuarioAndEvento(usuario.getId(), evento.getId());
         if (existente != null) {
             throw new IllegalStateException("Ya estás inscrito en este evento.");
@@ -73,6 +96,16 @@ public class InscripcionService extends GenericService<Inscripcion> {
         // Validate capacity
         if (!evento.tieneCupo()) {
             throw new IllegalStateException("No hay cupo disponible en este evento.");
+        }
+
+        // Check for a previously cancelled inscription and reactivate it
+        Inscripcion cancelada = findCanceladaByUsuarioAndEvento(usuario.getId(), evento.getId());
+        if (cancelada != null) {
+            cancelada.setEstado(EstadoInscripcion.ACTIVA);
+            cancelada.setFechaInscripcion(LocalDateTime.now());
+            cancelada.setEstaPresente(false);
+            cancelada.setFechaAsistencia(null);
+            return update(cancelada);
         }
 
         Inscripcion inscripcion = new Inscripcion(usuario, evento);

@@ -15,7 +15,7 @@ public class EventoService extends GenericService<Evento> {
     public List<Evento> findDisponibles() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
-                    "FROM Evento e WHERE e.disponible = true AND e.cancelado = false ORDER BY e.fechaInicio ASC",
+                    "SELECT DISTINCT e FROM Evento e LEFT JOIN FETCH e.inscripciones WHERE e.disponible = true AND e.cancelado = false ORDER BY e.fechaInicio ASC",
                     Evento.class)
                     .list();
         }
@@ -24,10 +24,21 @@ public class EventoService extends GenericService<Evento> {
     public List<Evento> findByOrganizador(Long organizadorId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
-                    "FROM Evento e WHERE e.organizador.id = :orgId ORDER BY e.fechaCreacion DESC",
+                    "SELECT DISTINCT e FROM Evento e LEFT JOIN FETCH e.inscripciones WHERE e.organizador.id = :orgId ORDER BY e.fechaCreacion DESC",
                     Evento.class)
                     .setParameter("orgId", organizadorId)
                     .list();
+        }
+    }
+
+    public Evento findWithInscripciones(Long id) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Evento evento = session.createQuery(
+                    "SELECT e FROM Evento e LEFT JOIN FETCH e.inscripciones LEFT JOIN FETCH e.organizador WHERE e.id = :id",
+                    Evento.class)
+                    .setParameter("id", id)
+                    .uniqueResult();
+            return evento;
         }
     }
 
@@ -45,6 +56,15 @@ public class EventoService extends GenericService<Evento> {
             throw new IllegalArgumentException("Evento no encontrado.");
         evento.setDisponible(false);
         return update(evento);
+    }
+
+    public List<Evento> findAllOrdered() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT DISTINCT e FROM Evento e LEFT JOIN FETCH e.inscripciones LEFT JOIN FETCH e.organizador ORDER BY e.fechaCreacion DESC",
+                    Evento.class)
+                    .list();
+        }
     }
 
     public Evento cancelar(Long eventoId) {

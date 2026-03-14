@@ -5,8 +5,11 @@ import io.javalin.Javalin;
 import io.javalin.rendering.FileRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pucmm.application.controllers.AdminController;
 import pucmm.application.controllers.AuthController;
 import pucmm.application.controllers.DashboardController;
+import pucmm.application.controllers.EventoController;
+import pucmm.application.controllers.InscripcionController;
 import pucmm.application.filters.AuthFilter;
 import pucmm.application.utils.DatabaseSeeder;
 import pucmm.application.utils.HibernateUtil;
@@ -56,6 +59,11 @@ public class Main {
 
                 // Admin routes
                 before("/admin/*", AuthFilter::requireAdmin);
+                get("/admin/usuarios", AdminController::listarUsuarios);
+                post("/admin/usuarios/{id}/bloquear", AdminController::toggleBloquear);
+                post("/admin/usuarios/{id}/rol", AdminController::cambiarRol);
+                get("/admin/eventos", AdminController::listarEventos);
+                post("/admin/eventos/{id}/eliminar", AdminController::eliminarEvento);
 
                 // Organizer routes
                 before("/mis-eventos", AuthFilter::requireOrganizador);
@@ -64,12 +72,27 @@ public class Main {
                 before("/eventos/crear/*", AuthFilter::requireOrganizador);
                 before("/escanear-qr", AuthFilter::requireOrganizador);
                 before("/escanear-qr/*", AuthFilter::requireOrganizador);
+                get("/mis-eventos", EventoController::misEventos);
+                get("/eventos/crear", EventoController::crearPage);
+                post("/eventos/crear", EventoController::crear);
 
                 // General authenticated routes
                 before("/eventos", AuthFilter::requireAuth);
                 before("/eventos/*", AuthFilter::requireAuth);
+                get("/eventos", EventoController::listar);
+                get("/eventos/{id}", EventoController::detalle);
+                get("/eventos/{id}/editar", EventoController::editarPage);
+                post("/eventos/{id}/editar", EventoController::editar);
+                post("/eventos/{id}/publicar", EventoController::togglePublicar);
+                post("/eventos/{id}/cancelar", EventoController::cancelar);
+                post("/eventos/{id}/inscribir", InscripcionController::inscribirse);
+
+                // Inscription routes
                 before("/mis-inscripciones", AuthFilter::requireAuth);
                 before("/mis-inscripciones/*", AuthFilter::requireAuth);
+                get("/mis-inscripciones", InscripcionController::misInscripciones);
+                before("/inscripciones/*", AuthFilter::requireAuth);
+                post("/inscripciones/{id}/cancelar", InscripcionController::cancelar);
             });
         });
 

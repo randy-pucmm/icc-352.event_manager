@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}">
+    <title>Mis Eventos</title>
+</head>
+<body>
+    <div th:replace="~{fragments/layout :: sidebar}">
+    </div>
+
+    <template id="pageContent">
+        <div class="container-fluid p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-list-alt me-2 text-primary"></i>Mis Eventos
+                    </h2>
+                    <p class="text-muted mb-0">Gestiona los eventos que has creado</p>
+                </div>
+                <a href="/eventos/crear" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-1"></i>Nuevo Evento
+                </a>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(eventos)}" class="text-center py-5">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No has creado ningún evento aún</h5>
+                <a href="/eventos/crear" class="btn btn-primary mt-2">
+                    <i class="fas fa-plus-circle me-1"></i>Crear mi primer evento
+                </a>
+            </div>
+
+            <!-- Events table -->
+            <div class="card border-0 shadow-sm" th:unless="${#lists.isEmpty(eventos)}">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Título</th>
+                                <th>Fecha</th>
+                                <th>Lugar</th>
+                                <th>Inscritos</th>
+                                <th>Estado</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="evento : ${eventos}" th:classappend="${evento.cancelado} ? 'table-secondary' : ''">
+                                <td class="fw-semibold" th:text="${evento.titulo}">Evento</td>
+                                <td th:text="${#temporals.format(evento.fechaInicio, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                                <td th:text="${evento.lugar}">Lugar</td>
+                                <td>
+                                    <span th:text="${evento.cupoMaximo - evento.cuposDisponibles}">0</span> /
+                                    <span th:text="${evento.cupoMaximo}">0</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark" th:if="${evento.cancelado}">Cancelado</span>
+                                    <span class="badge bg-success" th:if="${!evento.cancelado && evento.disponible}">Publicado</span>
+                                    <span class="badge bg-warning text-dark" th:if="${!evento.cancelado && !evento.disponible}">Borrador</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm" th:unless="${evento.cancelado}">
+                                        <a th:href="'/eventos/' + ${evento.id} + '/editar'" class="btn btn-outline-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-success btn-publicar"
+                                                th:data-id="${evento.id}"
+                                                th:data-disponible="${evento.disponible}"
+                                                th:title="${evento.disponible} ? 'Despublicar' : 'Publicar'">
+                                            <i th:classappend="${evento.disponible} ? 'fa-eye-slash' : 'fa-eye'" class="fas"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-cancelar"
+                                                th:data-id="${evento.id}" title="Cancelar evento">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </div>
+                                    <a th:href="'/eventos/' + ${evento.id}" class="btn btn-outline-secondary btn-sm" th:if="${evento.cancelado}" title="Ver">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const content = document.getElementById('pageContent');
+            const mainArea = document.querySelector('.main-content');
+            if (content && mainArea) {
+                mainArea.innerHTML = content.innerHTML;
+            }
+
+            // Publicar/Despublicar
+            document.querySelectorAll('.btn-publicar').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    const id = this.dataset.id;
+                    try {
+                        const data = await window.apiFetch('/eventos/' + id + '/publicar', { method: 'POST' });
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Error al cambiar estado');
+                        }
+                    } catch (err) {
+                        alert('Error: ' + err.message);
+                    }
+                });
+            });
+
+            // Cancelar
+            document.querySelectorAll('.btn-cancelar').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    if (!confirm('¿Estás seguro de que deseas cancelar este evento? Esta acción no se puede deshacer.')) return;
+                    const id = this.dataset.id;
+                    try {
+                        const data = await window.apiFetch('/eventos/' + id + '/cancelar', { method: 'POST' });
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Error al cancelar');
+                        }
+                    } catch (err) {
+                        alert('Error: ' + err.message);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

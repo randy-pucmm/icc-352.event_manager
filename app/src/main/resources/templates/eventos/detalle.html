@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}">
+    <title>Detalle Evento</title>
+</head>
+<body>
+    <div th:replace="~{fragments/layout :: sidebar}">
+    </div>
+
+    <template id="pageContent">
+        <div class="container-fluid p-4">
+            <a href="/eventos" class="btn btn-outline-secondary btn-sm mb-3">
+                <i class="fas fa-arrow-left me-1"></i>Volver a Eventos
+            </a>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h3 class="fw-bold mb-0" th:text="${evento.titulo}">Título</h3>
+                                <div>
+                                    <span class="badge bg-success-subtle text-success fs-6" th:if="${evento.tieneCupo() && !evento.cancelado}">Disponible</span>
+                                    <span class="badge bg-danger-subtle text-danger fs-6" th:if="${!evento.tieneCupo() && !evento.cancelado}">Lleno</span>
+                                    <span class="badge bg-dark fs-6" th:if="${evento.cancelado}">Cancelado</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4" th:if="${evento.descripcion != null && !evento.descripcion.isEmpty()}">
+                                <p class="text-muted" th:text="${evento.descripcion}">Descripción</p>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                        <i class="fas fa-calendar-check text-primary me-3 fs-5"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Fecha Inicio</small>
+                                            <span class="fw-semibold" th:text="${#temporals.format(evento.fechaInicio, 'dd/MM/yyyy HH:mm')}">Fecha</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                        <i class="fas fa-calendar-times text-danger me-3 fs-5"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Fecha Fin</small>
+                                            <span class="fw-semibold" th:text="${#temporals.format(evento.fechaFin, 'dd/MM/yyyy HH:mm')}">Fecha</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                        <i class="fas fa-map-marker-alt text-warning me-3 fs-5"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Lugar</small>
+                                            <span class="fw-semibold" th:text="${evento.lugar}">Lugar</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                        <i class="fas fa-user text-info me-3 fs-5"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Organizador</small>
+                                            <span class="fw-semibold" th:text="${evento.organizador.nombre}">Organizador</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <h5 class="fw-semibold mb-3">Cupos</h5>
+                            <div class="cupo-circle mx-auto mb-3">
+                                <span class="cupo-number" th:text="${evento.cuposDisponibles}">0</span>
+                                <small class="cupo-label">disponibles</small>
+                            </div>
+                            <div class="progress mb-2" style="height: 8px;">
+                                <div class="progress-bar" role="progressbar"
+                                     th:style="'width: ' + ${evento.cupoMaximo > 0 ? ((evento.cupoMaximo - evento.cuposDisponibles) * 100 / evento.cupoMaximo) : 0} + '%'"
+                                     th:classappend="${evento.cuposDisponibles == 0} ? 'bg-danger' : 'bg-primary'">
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                <span th:text="${evento.cupoMaximo - evento.cuposDisponibles}">0</span> de
+                                <span th:text="${evento.cupoMaximo}">0</span> inscritos
+                            </small>
+
+                            <!-- Inscription action for participants -->
+                            <div class="mt-4" th:if="${usuario.rol.name() == 'PARTICIPANTE' && !evento.cancelado}">
+                                <div th:if="${yaInscrito}">
+                                    <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-2">
+                                        <i class="fas fa-check-circle me-1"></i>Ya inscrito
+                                    </span>
+                                </div>
+                                <div th:unless="${yaInscrito}">
+                                    <button type="button" class="btn btn-primary w-100" id="btnInscribirse"
+                                            th:data-id="${evento.id}"
+                                            th:disabled="${!evento.tieneCupo()}">
+                                        <i class="fas fa-user-plus me-1"></i>
+                                        <span th:text="${evento.tieneCupo()} ? 'Inscribirme' : 'Sin cupo'">Inscribirme</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const content = document.getElementById('pageContent');
+            const mainArea = document.querySelector('.main-content');
+            if (content && mainArea) {
+                mainArea.innerHTML = content.innerHTML;
+            }
+
+            // Inscription button
+            const btnInscribirse = document.getElementById('btnInscribirse');
+            if (btnInscribirse) {
+                btnInscribirse.addEventListener('click', async function() {
+                    const id = this.dataset.id;
+                    try {
+                        const data = await window.apiFetch('/eventos/' + id + '/inscribir', { method: 'POST' });
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Error al inscribirse');
+                        }
+                    } catch (err) {
+                        alert('Error: ' + err.message);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

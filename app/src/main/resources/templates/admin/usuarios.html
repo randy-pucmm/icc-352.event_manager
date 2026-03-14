@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}">
+    <title>Gestión Usuarios</title>
+</head>
+<body>
+    <div th:replace="~{fragments/layout :: sidebar}">
+    </div>
+
+    <template id="pageContent">
+        <div class="container-fluid p-4">
+            <div class="mb-4">
+                <h2 class="fw-bold mb-1">
+                    <i class="fas fa-users-cog me-2 text-danger"></i>Gestión de Usuarios
+                </h2>
+                <p class="text-muted mb-0">Administra roles y acceso de usuarios</p>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Username</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Creado</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${usuarios}" th:classappend="${!u.activo} ? 'table-secondary' : ''">
+                                <td th:text="${u.id}">1</td>
+                                <td class="fw-semibold" th:text="${u.nombre}">Nombre</td>
+                                <td th:text="${u.username}">username</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${u.rol.name() == 'ADMINISTRADOR'} ? 'bg-danger' : (${u.rol.name() == 'ORGANIZADOR'} ? 'bg-primary' : 'bg-success')"
+                                          th:text="${u.rol.name()}" th:id="'rol-badge-' + ${u.id}">ROL</span>
+                                </td>
+                                <td>
+                                    <span class="badge" th:id="'estado-badge-' + ${u.id}"
+                                          th:classappend="${u.activo} ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'"
+                                          th:text="${u.activo} ? 'Activo' : 'Bloqueado'">Estado</span>
+                                </td>
+                                <td th:text="${#temporals.format(u.fechaCreacion, 'dd/MM/yyyy')}">Fecha</td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-1 justify-content-end" th:if="${u.eliminable}">
+                                        <select class="form-select form-select-sm select-rol" style="width: auto; min-width: 140px;"
+                                                th:data-id="${u.id}">
+                                            <option th:each="r : ${roles}" th:value="${r.name()}" th:text="${r.name()}"
+                                                    th:selected="${r.name() == u.rol.name()}">Rol</option>
+                                        </select>
+                                        <button type="button" class="btn btn-sm btn-bloquear"
+                                                th:data-id="${u.id}"
+                                                th:classappend="${u.activo} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                                th:title="${u.activo} ? 'Bloquear' : 'Desbloquear'">
+                                            <i class="fas" th:classappend="${u.activo} ? 'fa-lock' : 'fa-lock-open'"></i>
+                                        </button>
+                                    </div>
+                                    <span class="badge bg-secondary" th:unless="${u.eliminable}">Protegido</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const content = document.getElementById('pageContent');
+            const mainArea = document.querySelector('.main-content');
+            if (content && mainArea) {
+                mainArea.innerHTML = content.innerHTML;
+            }
+
+            // Change role
+            document.querySelectorAll('.select-rol').forEach(function(select) {
+                select.addEventListener('change', async function() {
+                    const id = this.dataset.id;
+                    const rol = this.value;
+                    try {
+                        const formData = new URLSearchParams();
+                        formData.append('rol', rol);
+                        const response = await fetch('/admin/usuarios/' + id + '/rol', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: formData
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            const badge = document.getElementById('rol-badge-' + id);
+                            badge.textContent = data.rol;
+                            badge.className = 'badge ' + (data.rol === 'ADMINISTRADOR' ? 'bg-danger' : (data.rol === 'ORGANIZADOR' ? 'bg-primary' : 'bg-success'));
+                        } else {
+                            alert(data.message || 'Error al cambiar rol');
+                        }
+                    } catch (err) {
+                        alert('Error: ' + err.message);
+                    }
+                });
+            });
+
+            // Toggle block
+            document.querySelectorAll('.btn-bloquear').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    const id = this.dataset.id;
+                    try {
+                        const data = await window.apiFetch('/admin/usuarios/' + id + '/bloquear', { method: 'POST' });
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Error al cambiar estado');
+                        }
+                    } catch (err) {
+                        alert('Error: ' + err.message);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

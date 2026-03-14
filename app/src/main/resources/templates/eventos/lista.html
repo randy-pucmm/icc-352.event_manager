@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}">
+    <title>Eventos</title>
+</head>
+<body>
+    <div th:replace="~{fragments/layout :: sidebar}">
+    </div>
+
+    <template id="pageContent">
+        <div class="container-fluid p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-calendar-alt me-2 text-primary"></i>Eventos Disponibles
+                    </h2>
+                    <p class="text-muted mb-0">Explora los eventos abiertos para inscripción</p>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" id="btnGrid" title="Vista tarjetas">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnList" title="Vista lista">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(eventos)}" class="text-center py-5">
+                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No hay eventos disponibles</h5>
+                <p class="text-muted">Vuelve más tarde para ver nuevos eventos.</p>
+            </div>
+
+            <!-- Grid View -->
+            <div id="gridView" th:if="${!#lists.isEmpty(eventos)}">
+                <div class="row g-4">
+                    <div class="col-md-6 col-xl-4" th:each="evento : ${eventos}">
+                        <div class="card event-card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title fw-semibold mb-0" th:text="${evento.titulo}">Evento</h5>
+                                    <span class="badge bg-success-subtle text-success" th:if="${evento.tieneCupo()}">Disponible</span>
+                                    <span class="badge bg-danger-subtle text-danger" th:unless="${evento.tieneCupo()}">Lleno</span>
+                                </div>
+                                <p class="text-muted small mb-3" th:text="${#strings.abbreviate(evento.descripcion, 120)}">Descripción</p>
+                                <div class="event-meta mt-auto">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-clock text-primary me-2"></i>
+                                        <small th:text="${#temporals.format(evento.fechaInicio, 'dd/MM/yyyy HH:mm')}">Fecha</small>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                        <small th:text="${evento.lugar}">Lugar</small>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-users text-info me-2"></i>
+                                        <small>
+                                            <span th:text="${evento.cuposDisponibles}">0</span> /
+                                            <span th:text="${evento.cupoMaximo}">0</span> cupos
+                                        </small>
+                                    </div>
+                                </div>
+                                <a th:href="'/eventos/' + ${evento.id}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>Ver Detalle
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List View (hidden by default) -->
+            <div id="listView" class="d-none" th:if="${!#lists.isEmpty(eventos)}">
+                <div class="card border-0 shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Evento</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Lugar</th>
+                                    <th>Cupos</th>
+                                    <th>Estado</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="evento : ${eventos}">
+                                    <td class="fw-semibold" th:text="${evento.titulo}">Evento</td>
+                                    <td th:text="${#temporals.format(evento.fechaInicio, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                                    <td th:text="${evento.lugar}">Lugar</td>
+                                    <td>
+                                        <span th:text="${evento.cuposDisponibles}">0</span> /
+                                        <span th:text="${evento.cupoMaximo}">0</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success" th:if="${evento.tieneCupo()}">Disponible</span>
+                                        <span class="badge bg-danger-subtle text-danger" th:unless="${evento.tieneCupo()}">Lleno</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="'/eventos/' + ${evento.id}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const content = document.getElementById('pageContent');
+            const mainArea = document.querySelector('.main-content');
+            if (content && mainArea) {
+                mainArea.innerHTML = content.innerHTML;
+            }
+
+            // Toggle view
+            const btnGrid = document.getElementById('btnGrid');
+            const btnList = document.getElementById('btnList');
+            const gridView = document.getElementById('gridView');
+            const listView = document.getElementById('listView');
+
+            if (btnGrid && btnList) {
+                btnGrid.addEventListener('click', function() {
+                    gridView.classList.remove('d-none');
+                    listView.classList.add('d-none');
+                    btnGrid.classList.add('active');
+                    btnList.classList.remove('active');
+                });
+                btnList.addEventListener('click', function() {
+                    gridView.classList.add('d-none');
+                    listView.classList.remove('d-none');
+                    btnList.classList.add('active');
+                    btnGrid.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
